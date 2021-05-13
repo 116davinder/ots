@@ -8,9 +8,14 @@ from datetime import timedelta
 from flask_cors import CORS
 import redis
 import uuid
+import logging
+
 
 app = Flask(__name__)
+
 CORS(app)
+
+salt = str.encode(os.getenv("OTS_SALT"))
 
 r = redis.Redis(
     host=os.getenv("OTS_DB_HOST", "localhost"),
@@ -25,8 +30,8 @@ def create_secret():
     content = request.get_json()
     if content is None or all(key in content for key in ("passphrase", "message")) is not True:
         return {"success": "False", "message": "Missing passphrase and/or message"}, 400
-    passphrase = content["passphrase"]
-    message = content["message"]
+    passphrase = content["passphrase"].strip()
+    message = content["message"].strip()
     if "expiration_time" in content:
         expiration_time = content["expiration_time"]
         if isinstance(expiration_time, int) is True:
@@ -44,7 +49,6 @@ def create_secret():
     # setup a Fernet key based on our passphrase
     password_provided = passphrase  # This is input in the form of a string
     password = password_provided.encode()  # Convert to type bytes
-    salt = str.encode(os.getenv("SALT"))
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -95,7 +99,6 @@ def get_secret(id):
     # If this doesn't return a value we say secret has either
     # never existed or it was already read
     password = passphrase.encode()  # Convert to type bytes
-    salt = str.encode(os.getenv("SALT"))
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -106,5 +109,4 @@ def get_secret(id):
     key = base64.urlsafe_b64encode(kdf.derive(password))  # Can only use kdf once
     f = Fernet(key)
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
-
     return {"success": "True", "message": decrypted_message.decode("utf-8")}

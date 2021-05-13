@@ -1,2 +1,1 @@
-# one-time-secret-frontend
-Created with CodeSandbox
+# OTS Frontend Application

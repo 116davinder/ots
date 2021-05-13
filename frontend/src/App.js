@@ -29,26 +29,25 @@ function CreateSecretForm() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    const apiUrl = "http://localhost:5000/secrets";
+
     const res = await fetch(
-      "http://localhost:5000/secrets",
+      apiUrl,
       {
         method: "POST",
-        data: JSON.stringify({ message, passphrase })
+        body: JSON.stringify({ message, passphrase, "expiration_time": 604800 }),
+        headers: { 'Content-Type': 'application/json' },
       }
     );
+
     const data = await res.json();
 
-    // TODO: replace with real data
-    // const data = {
-    //   id: "9b2d48af1f04474fb00bfa3357eb5ede",
-    //   success: "True"
-    // };
-
-    // now we have a hash/id from the api
-    // display that to the user so they can give that to friends
-    console.log(data);
-
-    setSecretId(data.id);
+    // console.log(data);
+    if(res.status === 200){
+      setSecretId(data.id);
+    }else{
+      alert(data.message)
+    }
   }
 
   return (
@@ -92,23 +91,22 @@ function CreateSecretForm() {
 function ShowSecretForm() {
   const [id, setId] = useState("");
   const [passphrase, setPassphrase] = useState("");
-  const [secretMessage, setSecretMessage] = useState(null);
+  const [message, setmessage] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const res = await fetch(`http://localhost:5000/secrets/${id}`, {
+    const apiUrl = `http://localhost:5000/secrets/${id}`;
+
+    const res = await fetch(apiUrl, {
       method: "POST",
-      data: JSON.stringify({ id, passphrase })
+      body: JSON.stringify({ passphrase }),
+      headers: { 'Content-Type': 'application/json' },
     });
+
     const data = await res.json();
 
-    // TODO: replace with real data!
-    // const data = {};
-
-    // now we have a hash/id from the api
-    // display that to the user so they can give that to friends
-    alert(data);
+    setmessage(data.message)  
   }
 
   return (
@@ -139,13 +137,12 @@ function ShowSecretForm() {
         </button>
       </form>
 
-      {/* show the secret message */}
-      {secretMessage && (
+      {/* show the message */}
+      {message && (
         <div className="bg-white text-gray-800 p-4 rounded shadow mt-10">
           <p className="mb-3">
-            Your secret message is{" "}
-            <strong className="text-blue-400 font-bold">{secretMessage}</strong>
-            .
+            Message: {" "}
+            <strong className="text-blue-400 font-bold">{message}</strong>
           </p>
         </div>
       )}
