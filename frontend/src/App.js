@@ -29,10 +29,10 @@ function CreateSecretForm() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const apiUrl = "http://localhost:5000/secrets";
+    console.log(process.env.REACT_APP_OTS_BACKEND_URL);
 
     const res = await fetch(
-      apiUrl,
+      process.env.REACT_APP_OTS_BACKEND_URL,
       {
         method: "POST",
         body: JSON.stringify({ message, passphrase, "expiration_time": 604800 }),
@@ -96,12 +96,12 @@ function ShowSecretForm() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const apiUrl = `http://localhost:5000/secrets/${id}`;
-
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      body: JSON.stringify({ passphrase }),
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(
+      `${process.env.REACT_APP_OTS_BACKEND_URL}/${id}`,
+      {
+        method: "POST",
+        body: JSON.stringify({ passphrase }),
+        headers: { 'Content-Type': 'application/json' },
     });
 
     const data = await res.json();

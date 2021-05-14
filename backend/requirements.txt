@@ -1,4 +1,7 @@
+Rust
+cffi
 cryptography
 Flask
 Flask-Cors
 gunicorn
+redis

@@ -1,8 +1,11 @@
 # Python One Time Secret API #
 
-This API is modified version [onetimesecret.com](https://github.com/do-community/python-ots-api).
+This API is modified version [python-ots-api](https://github.com/do-community/python-ots-api).
 
-**Note: Following these steps will result in charges for the use of DigitalOcean services**
+**Note: Redis UI can be installed using https://github.com/qishibo/AnotherRedisDesktopManager**
+
+
+## API
 
 ### POST `/secrets`
 Create a secret associated with a passphrase. Setting an experation time is 

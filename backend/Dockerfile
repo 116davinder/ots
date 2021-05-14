@@ -1,10 +1,12 @@
-from python:3.8.10-alpine3.13
+from python:3.8.10
 
 RUN mkdir -p /app
 
-COPY requirements.txt /app
+RUN apt install gcc openssl libbz2-dev -y
 
-RUN apk add gcc libffi libffi-dev
+RUN pip3 install --upgrade pip
+
+COPY requirements.txt /app
 
 RUN pip3 install -r /app/requirements.txt
 

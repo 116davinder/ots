@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 services:
   database:
     image: redis:latest
@@ -19,4 +19,4 @@ services:
     ports:
       - "3000:3000"
     environment:
-      OTS_BACKEND_URL: "http://backend:5000/secrets"
+      REACT_APP_OTS_BACKEND_URL: "http://backend:5000/secrets"
