@@ -8,10 +8,15 @@ from datetime import timedelta
 from flask_cors import CORS
 import redis
 import uuid
-import logging
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
+
+limiter = Limiter(
+    app,
+    key_func=get_remote_address
+)
 
 CORS(app)
 
@@ -21,11 +26,12 @@ r = redis.Redis(
     host=os.getenv("OTS_DB_HOST", "localhost"),
     port=os.getenv("OTS_DB_PORT", 6379),
     password=os.getenv("OTS_DB_PASSWORD", None),
-    ssl=os.getenv("OTS_SSL", "False") == "True",
+    ssl=os.getenv("OTS_DB_SSL", "False") == "True",
     db=0
 )
 
 @app.route("/secrets", methods=["POST"])
+@limiter.limit("100/second")
 def create_secret():
     content = request.get_json()
     if content is None or all(key in content for key in ("passphrase", "message")) is not True:
@@ -69,6 +75,7 @@ def create_secret():
     return {"success": "True", "id": id}
 
 @app.route("/secrets/<id>", methods=["POST"])
+@limiter.limit("100/second")
 def get_secret(id):
     content = request.get_json()
     if "passphrase" not in content:

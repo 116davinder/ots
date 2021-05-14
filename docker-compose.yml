@@ -2,8 +2,6 @@ version: "3.3"
 services:
   database:
     image: redis:latest
-    ports:
-      - "6379:6379"
   backend:
     image: ots_backend:latest
     ports:
@@ -13,10 +11,10 @@ services:
       OTS_DB_HOST: database
       OTS_DB_PORT: 6379
       # OTS_DB_PASSWORD: None
-      OTS_SSL: "False"
+      OTS_DB_SSL: "False"
   frontend:
     image: ots_frontend:latest
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_OTS_BACKEND_URL: "http://backend:5000/secrets"
+      REACT_APP_OTS_BACKEND_URL: "http://localhost:5000/secrets"

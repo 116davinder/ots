@@ -1,7 +1,6 @@
-Rust
-cffi
-cryptography
-Flask
-Flask-Cors
-gunicorn
-redis
+cryptography>=3.4.7
+Flask>=2.0.0
+Flask-Cors>=3.0.10
+gunicorn>=20.1.0
+redis>=3.5.3
+Flask-Limiter>=1.4
