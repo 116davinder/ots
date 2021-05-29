@@ -38,8 +38,6 @@ app = FastAPI(
 # CORS
 _origins = ['*']
 
-print(_origins)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
