@@ -1,20 +1,24 @@
-version: "3.3"
+version: "3.9"
 services:
-  database:
+  ots_database:
     image: redis:latest
-  backend:
+    container_name: ots_database
+  ots_backend:
     image: ots_backend:latest
+    container_name: ots_backend
     ports:
       - "5000:5000"
     environment:
-      OTS_SALT: 'this is super secret salt'
-      OTS_DB_HOST: database
+      OTS_SALT: 'somethingIDonotWantToKnow'
+      OTS_DB_HOST: ots_database
       OTS_DB_PORT: 6379
       # OTS_DB_PASSWORD: None
       OTS_DB_SSL: "False"
-  frontend:
+      OTS_DB_NAME: 0
+  ots_frontend:
     image: ots_frontend:latest
+    container_name: ots_frontend
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_OTS_BACKEND_URL: "http://localhost:5000/secrets"
+      REACT_APP_OTS_BACKEND_URL: "http://ots_backend:5000"
