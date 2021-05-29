@@ -29,24 +29,23 @@ function CreateSecretForm() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    console.log(process.env.REACT_APP_OTS_BACKEND_URL);
-
     const res = await fetch(
-      process.env.REACT_APP_OTS_BACKEND_URL,
+      process.env.REACT_APP_OTS_BACKEND_URL + "/create_secret",
       {
         method: "POST",
-        body: JSON.stringify({ message, passphrase, "expiration_time": 604800 }),
-        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, passphrase, "expiration_time": 259200 }), // 3 days default expiration time
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
       }
     );
 
     const data = await res.json();
 
-    // console.log(data);
-    if(res.status === 200){
+    if(res.ok){
       setSecretId(data.id);
     }else{
-      alert(data.message)
+      alert(data.detail);
     }
   }
 
@@ -97,16 +96,23 @@ function ShowSecretForm() {
     e.preventDefault();
 
     const res = await fetch(
-      `${process.env.REACT_APP_OTS_BACKEND_URL}/${id}`,
+      process.env.REACT_APP_OTS_BACKEND_URL + "/get_secret",
       {
         method: "POST",
-        body: JSON.stringify({ passphrase }),
-        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, passphrase }),
+        headers: new Headers({
+          'Content-Type': 'application/json',
+        }),
     });
 
     const data = await res.json();
 
-    setmessage(data.message)  
+    if(res.ok){
+      setmessage(data.message);
+    }else{
+      alert(data.detail);
+    }
+    
   }
 
   return (

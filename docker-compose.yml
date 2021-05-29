@@ -3,6 +3,8 @@ services:
   ots_database:
     image: redis:latest
     container_name: ots_database
+    ports:
+      - "6379:6379"
   ots_backend:
     image: ots_backend:latest
     container_name: ots_backend

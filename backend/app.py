@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import certifi
+from fastapi.middleware.cors import CORSMiddleware
 
 tags_metadata = [
     {
@@ -32,6 +33,19 @@ app = FastAPI(
     description="This project will create ontime secret id for secret sharing across different organisation.",
     version="0.1.0",
     openapi_tags=tags_metadata
+)
+
+# CORS
+_origins = ['*']
+
+print(_origins)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 salt = str.encode(getenv("OTS_SALT", "somethingIDonotWantToKnow"))
@@ -64,6 +78,12 @@ def create_secret(secret: Secrets):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Missing passphrase and/or message"
+        )
+
+    if len(_message) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message can't be empty"
         )
 
     id = uuid4().hex
@@ -111,7 +131,7 @@ def get_secret(id: Id):
     if data is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="the secret either have been viewed earlier or never existed"
+            detail="either the secret have been viewed earlier or never existed"
         )
 
     data = data.decode("utf-8")
