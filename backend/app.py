@@ -1,119 +1,147 @@
-from flask import Flask, request
-import base64, os, hashlib
+import base64, hashlib
+from os import getenv
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from datetime import timedelta
-from flask_cors import CORS
 import redis
-import uuid
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from uuid import uuid4
+from fastapi import FastAPI, status, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import Optional
+import uvicorn
+import certifi
 
-app = Flask(__name__)
+tags_metadata = [
+    {
+        "name": "Create Secret",
+        "description": "It will return a secret id based on given parameters" +
+            "like message/passphrase/expiration_time after saving them in redis database.",
+    },
+    {
+        "name": "get_secret",
+        "description": "It will return secret message if given parameters like" +
+            "passphrase/id matches with stored value in redis database",
+    },
+]
 
-limiter = Limiter(
-    app,
-    key_func=get_remote_address
+app = FastAPI(
+    title="One Time Secret Sharing Application",
+    description="This project will create ontime secret id for secret sharing across different organisation.",
+    version="0.1.0",
+    openapi_tags=tags_metadata
 )
 
-CORS(app)
-
-salt = str.encode(os.getenv("OTS_SALT"))
+salt = str.encode(getenv("OTS_SALT", "somethingIDonotWantToKnow"))
 
 r = redis.Redis(
-    host=os.getenv("OTS_DB_HOST", "localhost"),
-    port=os.getenv("OTS_DB_PORT", 6379),
-    password=os.getenv("OTS_DB_PASSWORD", None),
-    ssl=os.getenv("OTS_DB_SSL", "False") == "True",
-    db=0
+    host=getenv("OTS_DB_HOST", "localhost"),
+    port=getenv("OTS_DB_PORT", 6379),
+    password=getenv("OTS_DB_PASSWORD", None),
+    ssl=getenv("OTS_DB_SSL", "False").title() == "True",
+    ssl_ca_certs=certifi.where(),
+    db=getenv("OTS_DB_NAME", 0)
 )
 
-@app.route("/secrets", methods=["POST"])
-@limiter.limit("100/second")
-def create_secret():
-    content = request.get_json()
-    if content is None or all(key in content for key in ("passphrase", "message")) is not True:
-        return {"success": "False", "message": "Missing passphrase and/or message"}, 400
-    passphrase = content["passphrase"].strip()
-    message = content["message"].strip()
-    if "expiration_time" in content:
-        expiration_time = content["expiration_time"]
-        if isinstance(expiration_time, int) is True:
-            expiration_time = content["expiration_time"]
-        else:
-            if content["expiration_time"].isdigit():
-                expiration_time = int(content["expiration_time"])
-    else:
-        expiration_time = 604800
+class Secrets(BaseModel):
+    passphrase: Optional[str]
+    message: str = None
+    expiration_time: Optional[int] = 604800
 
-    id = uuid.uuid4().hex
-    m = hashlib.sha256()
-    m.update(passphrase.encode("utf-8"))
-    sha = m.hexdigest()
+class Id(BaseModel):
+    passphrase: Optional[str]
+    id: str
+
+@app.post("/create_secret", status_code=status.HTTP_201_CREATED, response_class=JSONResponse, tags=["Create Secret"])
+def create_secret(secret: Secrets):
+    _pass = secret.passphrase
+    _message = secret.message
+    _expiration_time = secret.expiration_time
+
+    if _pass is None or _message is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing passphrase and/or message"
+        )
+
+    id = uuid4().hex
+    m = hashlib.sha3_512()
+    m.update(_pass.encode("utf-8"))
+    user_sha = m.hexdigest()
     # setup a Fernet key based on our passphrase
-    password_provided = passphrase  # This is input in the form of a string
-    password = password_provided.encode()  # Convert to type bytes
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
+        algorithm=hashes.SHA3_512(),
         length=32,
         salt=salt,
         iterations=100000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(password))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
     f = Fernet(key)
 
     # encrypt the message
-    ciphertext = f.encrypt(message.encode("utf-8"))
+    ciphertext = f.encrypt(_message.encode("utf-8"))
+
+    #update redis database
     r.setex(
         id,
-        timedelta(seconds=expiration_time),
-        "{0}\n{1}".format(sha, ciphertext.decode("utf-8")),
+        timedelta(seconds=_expiration_time),
+        "{0}\n{1}".format(user_sha, ciphertext.decode("utf-8")),
     )
-    return {"success": "True", "id": id}
+    return {"id": id}
 
-@app.route("/secrets/<id>", methods=["POST"])
-@limiter.limit("100/second")
-def get_secret(id):
-    content = request.get_json()
-    if "passphrase" not in content:
-        return {"success": "False", "message": "Missing passphrase"}, 400
-    passphrase = content["passphrase"]
+@app.post("/get_secret", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["get_secret"])
+def get_secret(id: Id):
+    """
+    Reads given body with id and passphrase.
+    """
+    _pass = id.passphrase
+    _id = id.id
 
-    data = r.get(id)
+    if _pass is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="missing passphrase"
+        )
+
+    # get data from redis
+    data = r.get(_id)
     if data is None:
-        return {
-            "success": "False",
-            "message": "This secret either never existed or it was already read",
-        }, 404
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="the secret either have been viewed earlier or never existed"
+        )
 
     data = data.decode("utf-8")
     stored_sha, stored_ciphertext = data.split("\n")
 
-    m = hashlib.sha256()
-    m.update(passphrase.encode("utf-8"))
-    sha = m.hexdigest()
+    m = hashlib.sha3_512()
+    m.update(_pass.encode("utf-8"))
+    user_sha = m.hexdigest()
 
-    if stored_sha != sha:
-        return {
-            "success": "False",
-            "message": "This secret either never existed or it was already read",
-        }
+    if stored_sha != user_sha:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="please check your passphrase again"
+        )
 
-    r.delete(id)
+    r.delete(_id)
     # If this doesn't return a value we say secret has either
     # never existed or it was already read
-    password = passphrase.encode()  # Convert to type bytes
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
+        algorithm=hashes.SHA3_512(),
         length=32,
         salt=salt,
         iterations=100000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(password))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
     f = Fernet(key)
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
-    return {"success": "True", "message": decrypted_message.decode("utf-8")}
+    return {"message": decrypted_message.decode("utf-8")}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=5000)
