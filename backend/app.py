@@ -124,6 +124,12 @@ def get_secret(id: Id):
             detail="missing passphrase"
         )
 
+    if len(_id) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="missing secret message id"
+        )
+
     # get data from redis
     data = r.get(_id)
     if data is None:

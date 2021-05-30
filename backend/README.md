@@ -12,9 +12,9 @@ This API is inspired from [python-ots-api](https://github.com/do-community/pytho
 
 ### Local Development Usage
 ```
-$ docker run --rm -p 6379:6379 redis
+docker run --rm -p 6379:6379 redis
 
-$ uvicorn app:app --reload --host 0.0.0.0 --port 5000
+uvicorn app:app --reload --host 0.0.0.0 --port 5000
 ```
 
 ### Production Usage
@@ -33,3 +33,6 @@ python3 app.py
 
 * [Swagger UI @ /docs](http://127.0.0.1:5000/docs)
 * [OpenAPIJson @ /openapi.json](http://127.0.0.1:5000/openapi.json)
+
+### Sample Images
+![Swagger Image](../images/OTS_BACKEND_SWAGGER.png)
