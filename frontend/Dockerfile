@@ -12,10 +12,12 @@ ENV CI=true
 
 RUN npm install
 
+RUN npm install -g env-cmd serve
+
 COPY . ./
 
 EXPOSE 3000
 
 ENV REACT_APP_OTS_BACKEND_URL=""
 
-CMD ["npm", "start"]
+CMD sh /app/entrypoint.sh

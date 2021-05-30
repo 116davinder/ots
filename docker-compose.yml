@@ -27,7 +27,4 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # client/user should be able to resolve below REACT_APP_OTS_BACKEND_URL
-      # Either update /etc/hosts file to resolve ots_backend=localhost
-      # or change address to http://localhost:5000 
-      REACT_APP_OTS_BACKEND_URL: "http://localhost:5000"
+      REACT_APP_ENV: "prod"
