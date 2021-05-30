@@ -8,6 +8,8 @@ services:
   ots_backend:
     image: ots_backend:latest
     container_name: ots_backend
+    build: 
+      context: backend/
     ports:
       - "5000:5000"
     environment:
@@ -20,7 +22,12 @@ services:
   ots_frontend:
     image: ots_frontend:latest
     container_name: ots_frontend
+    build:
+      context: frontend/
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_OTS_BACKEND_URL: "http://ots_backend:5000"
+      # client/user should be able to resolve below REACT_APP_OTS_BACKEND_URL
+      # Either update /etc/hosts file to resolve ots_backend=localhost
+      # or change address to http://localhost:5000 
+      REACT_APP_OTS_BACKEND_URL: "http://localhost:5000"
