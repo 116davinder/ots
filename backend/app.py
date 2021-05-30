@@ -15,6 +15,9 @@ import uvicorn
 import certifi
 from fastapi.middleware.cors import CORSMiddleware
 
+__author__ = "Davinder Pal"
+__author_email__ = "dpsangwal@gmail.com"
+
 tags_metadata = [
     {
         "name": "Create Secret",
@@ -54,6 +57,8 @@ r = redis.Redis(
     password=getenv("OTS_DB_PASSWORD", None),
     ssl=getenv("OTS_DB_SSL", "False").title() == "True",
     ssl_ca_certs=certifi.where(),
+    ssl_cert_reqs='required',
+    ssl_check_hostname=False,
     db=getenv("OTS_DB_NAME", 0)
 )
 
