@@ -27,4 +27,4 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_ENV: "prod"
+      REACT_APP_ENV: "dev"

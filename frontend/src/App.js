@@ -146,10 +146,9 @@ function ShowSecretForm() {
       {/* show the message */}
       {message && (
         <div className="bg-white text-gray-800 p-4 rounded shadow mt-10">
-          <p className="mb-3">
-            Message: {" "}
+          <pre className="mb-3">
             <strong className="text-blue-400 font-bold">{message}</strong>
-          </p>
+          </pre>
         </div>
       )}
     </>
