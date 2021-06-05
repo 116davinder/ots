@@ -29,6 +29,10 @@ tags_metadata = [
         "description": "It will return secret message if given parameters like" +
             "passphrase/id matches with stored value in redis database",
     },
+    {
+    "name": "health",
+    "description": "It will return ok on get request."
+    },
 ]
 
 app = FastAPI(
@@ -171,6 +175,9 @@ def get_secret(id: Id):
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
     return {"message": decrypted_message.decode("utf-8")}
 
+@app.get("/health", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["health"])
+def health():
+    return {"health": "ok"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)

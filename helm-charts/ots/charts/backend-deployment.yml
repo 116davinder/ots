@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ots-backend
+  namespace: ots
+  labels:
+    app: ots-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ots-backend
+  template:
+    metadata:
+      labels:
+        app: ots-backend
+    spec:
+      containers:
+      - name: ots-backend
+        image: ots_backend
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "125m"
+          limits:
+            memory: "256Mi"
+            cpu: "256m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 3
+        env:
+        - name: OTS_SALT
+          value: "somethingIDonotWantToKnow"
+        - name: OTS_DB_HOST
+          value: "localhost"
+        - name: OTS_DB_PORT
+          value: "6379"
+        # - name: OTS_DB_PASSWORD
+        #   value: None
+        - name: OTS_DB_SSL
+          value: "False"
+        - name: OTS_DB_NAME
+          value: "0"
