@@ -102,7 +102,7 @@ def create_secret(secret: Secrets):
         algorithm=hashes.SHA3_512(),
         length=32,
         salt=salt,
-        iterations=100000,
+        iterations=10000,
         backend=default_backend(),
     )
     key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
@@ -167,7 +167,7 @@ def get_secret(id: Id):
         algorithm=hashes.SHA3_512(),
         length=32,
         salt=salt,
-        iterations=100000,
+        iterations=10000,
         backend=default_backend(),
     )
     key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
@@ -180,4 +180,7 @@ def health():
     return {"health": "ok"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    log_config = uvicorn.config.LOGGING_CONFIG
+    log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+    log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+    uvicorn.run(app, host="0.0.0.0", port=5000, log_config=log_config)
