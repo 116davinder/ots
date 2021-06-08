@@ -5,6 +5,11 @@ services:
     container_name: ots_database
     ports:
       - "6379:6379"
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 50M
   ots_backend:
     image: ots_backend:latest
     container_name: ots_backend
@@ -19,6 +24,11 @@ services:
       # OTS_DB_PASSWORD: None
       OTS_DB_SSL: "False"
       OTS_DB_NAME: 0
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 50M
   ots_frontend:
     image: ots_frontend:latest
     container_name: ots_frontend
