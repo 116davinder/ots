@@ -5,10 +5,6 @@ echo "Checking OTS Backend URL Environment Variable"
 [[ -z "$REACT_APP_OTS_BACKEND_URL" ]] && echo "Empty Backend URL" && exit 1
 echo
 echo "-----------------"
-echo "Clean up enironment file"
-rm -rf .env
-echo
-echo "-----------------"
 echo "Setup environment file"
 echo "REACT_APP_OTS_BACKEND_URL=$REACT_APP_OTS_BACKEND_URL" | tee .env
 echo "-----------------"
