@@ -19,5 +19,6 @@ COPY . ./
 EXPOSE 3000
 
 ENV REACT_APP_OTS_BACKEND_URL=""
+ENV REACT_APP_ENV="dev"
 
 CMD sh /app/entrypoint.sh

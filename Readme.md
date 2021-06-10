@@ -18,7 +18,9 @@ docker-compose up
 
 ### Local Urls
 [Frontend UI](http://localhost:3000)
+
 [Backend API](http://localhost:5000)
+
 [Backend Swagger UI](http://localhost:5000/docs)
 
 ## Production Stack

@@ -5,6 +5,7 @@ It is a react based application and modified version of [one-time-secret-fronten
 ### Local development run
 ```bash
 export REACT_APP_OTS_BACKEND_URL="http://localhost:5000"
+export REACT_APP_ENV="dev"
 
 npm install
 npm start
