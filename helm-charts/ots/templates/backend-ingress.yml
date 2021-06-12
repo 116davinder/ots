@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ots-backend
+  namespace: ots
+spec:
+  rules:
+    - host: api.ots.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ots-backend
+                port:
+                  number: 5000

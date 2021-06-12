@@ -23,23 +23,23 @@ spec:
         - containerPort: 5000
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "512m"
           limits:
-            memory: "256Mi"
+            memory: "512Mi"
             cpu: "1024m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5000
-          initialDelaySeconds: 20
-          periodSeconds: 5
         readinessProbe:
           httpGet:
             path: /health
             port: 5000
           initialDelaySeconds: 15
-          periodSeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 5
         env:
         - name: OTS_SALT
           value: "somethingIDonotWantToKnow"

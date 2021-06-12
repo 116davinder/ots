@@ -1,23 +1,23 @@
 kind: HorizontalPodAutoscaler 
 apiVersion: autoscaling/v2beta2
 metadata:
-  name: ots-backend
+  name: ots-frontend
   namespace: ots
 spec:
-  maxReplicas: 50
+  maxReplicas: 10
   minReplicas: 1 
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment 
-    name: ots-backend
+    name: ots-frontend
   behavior:
     scaleUp:
       policies:
       - type: Pods
         value: 1
-        periodSeconds: 30
+        periodSeconds: 60
       selectPolicy: Max
-      stabilizationWindowSeconds: 0
+      stabilizationWindowSeconds: 180
     scaleDown:
       policies:
       - type: Pods
@@ -31,10 +31,10 @@ spec:
       name: cpu
       target:
         type: Utilization 
-        averageUtilization: 60
+        averageUtilization: 80
   - type: Resource
     resource:
       name: memory
       target:
         type: Utilization 
-        averageUtilization: 60
+        averageUtilization: 80

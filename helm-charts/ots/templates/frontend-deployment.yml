@@ -23,25 +23,25 @@ spec:
         - containerPort: 3000
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "125m"
-          limits:
             memory: "256Mi"
-            cpu: "256m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 20
-          periodSeconds: 5
+            cpu: "512m"
+          limits:
+            memory: "512Mi"
+            cpu: "1024m"
         readinessProbe:
           httpGet:
             path: /
             port: 3000
-          initialDelaySeconds: 15
-          periodSeconds: 3
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 45
+          periodSeconds: 5
         env:
         - name: REACT_APP_ENV
           value: "prod"
         - name: REACT_APP_OTS_BACKEND_URL
-          value: "https://api.ots.example.com"
+          value: "http://api.ots.com"
