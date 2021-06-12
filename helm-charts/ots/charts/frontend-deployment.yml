@@ -42,4 +42,6 @@ spec:
           periodSeconds: 3
         env:
         - name: REACT_APP_ENV
-          value: "dev"
+          value: "prod"
+        - name: REACT_APP_OTS_BACKEND_URL
+          value: "https://api.ots.example.com"

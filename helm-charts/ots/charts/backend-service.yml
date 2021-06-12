@@ -6,6 +6,9 @@ metadata:
 spec:
   selector:
     app: ots-backend
+  type: NodePort
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 5000
+      targetPort: 5000

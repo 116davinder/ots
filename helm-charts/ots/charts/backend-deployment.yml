@@ -24,10 +24,10 @@ spec:
         resources:
           requests:
             memory: "128Mi"
-            cpu: "125m"
+            cpu: "512m"
           limits:
             memory: "256Mi"
-            cpu: "256m"
+            cpu: "1024m"
         livenessProbe:
           httpGet:
             path: /health
@@ -44,11 +44,11 @@ spec:
         - name: OTS_SALT
           value: "somethingIDonotWantToKnow"
         - name: OTS_DB_HOST
-          value: "localhost"
+          value: "192.168.29.243"
         - name: OTS_DB_PORT
           value: "6379"
-        # - name: OTS_DB_PASSWORD
-        #   value: None
+        - name: OTS_DB_PASSWORD
+          # value: "someRedisPassword"
         - name: OTS_DB_SSL
           value: "False"
         - name: OTS_DB_NAME

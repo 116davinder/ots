@@ -6,7 +6,9 @@ metadata:
 spec:
   selector:
     app: ots-frontend
+  type: ClusterIP
   ports:
-    - protocol: TCP
-      port: 80
+    - name: http
+      protocol: TCP
+      port: 3000
       targetPort: 3000
