@@ -1,33 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ots-backend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-backend"
+  namespace: "{{ .Values.otsNamespace }}"
   labels:
-    app: ots-backend
+    app: "{{ .Values.otsNamespace }}-backend"
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.otsBackendReplicas }}
   selector:
     matchLabels:
-      app: ots-backend
+      app: "{{ .Values.otsNamespace }}-backend"
   template:
     metadata:
       labels:
-        app: ots-backend
+        app: "{{ .Values.otsNamespace }}-backend"
+        {{- range $k, $v := .Values.labels }}
+        {{ $k }}: {{ $v | quote }}
+        {{- end }}
     spec:
       containers:
-      - name: ots-backend
-        image: ots_backend
-        imagePullPolicy: Never
+      - name: "{{ .Values.otsNamespace }}-backend"
+        image: "{{ .Values.otsBackendImage }}"
+        imagePullPolicy: "{{ .Values.otsBackendImagePullPolicy }}"
         ports:
         - containerPort: 5000
         resources:
-          requests:
-            memory: "256Mi"
-            cpu: "512m"
-          limits:
-            memory: "512Mi"
-            cpu: "1024m"
+          {{- .Values.otsBackendResources | toYaml | nindent 10 }}
         readinessProbe:
           httpGet:
             path: /health
@@ -41,15 +42,18 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 5
         env:
-        - name: OTS_SALT
-          value: "somethingIDonotWantToKnow"
-        - name: OTS_DB_HOST
-          value: "192.168.29.243"
-        - name: OTS_DB_PORT
-          value: "6379"
-        - name: OTS_DB_PASSWORD
-          # value: "someRedisPassword"
-        - name: OTS_DB_SSL
-          value: "False"
-        - name: OTS_DB_NAME
-          value: "0"
+          - name: OTS_SALT
+            value: {{ .Values.otsBackendEnv.OTS_SALT | default "somethingIDonotWantToKnow" | quote }}
+          - name: OTS_DB_HOST
+            value: {{ .Values.otsBackendEnv.OTS_DB_HOST | quote }}
+          - name: OTS_DB_PORT
+            value: {{ .Values.otsBackendEnv.OTS_DB_PORT | default 6379 | quote }}
+          - name: OTS_DB_PASSWORD
+            {{- if empty .Values.otsBackendEnv.OTS_DB_PASSWORD }}
+            {{- else }}
+            value: {{ .Values.otsBackendEnv.OTS_DB_PASSWORD | quote }}
+            {{- end }}
+          - name: OTS_DB_SSL
+            value: {{ .Values.otsBackendEnv.OTS_DB_SSL | default "False" | title | quote }}
+          - name: OTS_DB_NAME
+            value: {{ .Values.otsBackendEnv.OTS_DB_NAME | default 0 | quote }}

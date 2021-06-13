@@ -1,12 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ots-backend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-backend"
+  namespace: "{{ .Values.otsNamespace }}"
+  labels:
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
   selector:
-    app: ots-backend
-  type: NodePort
+    app: "{{ .Values.otsNamespace }}-backend"
+  type: "{{ .Values.otsBackendServiceType }}"
   ports:
     - name: http
       protocol: TCP

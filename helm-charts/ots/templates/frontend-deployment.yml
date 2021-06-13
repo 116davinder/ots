@@ -1,33 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ots-frontend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-frontend"
+  namespace: "{{ .Values.otsNamespace }}"
   labels:
-    app: ots-frontend
+    app: "{{ .Values.otsNamespace }}-frontend"
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.otsFrontendReplicas }}
   selector:
     matchLabels:
-      app: ots-frontend
+      app: "{{ .Values.otsNamespace }}-frontend"
   template:
     metadata:
       labels:
-        app: ots-frontend
+        app: "{{ .Values.otsNamespace }}-frontend"
+        {{- range $k, $v := .Values.labels }}
+        {{ $k }}: {{ $v | quote }}
+        {{- end }}
     spec:
       containers:
-      - name: ots-frontend
-        image: ots_frontend
-        imagePullPolicy: Never
+      - name: "{{ .Values.otsNamespace }}-frontend"
+        image: "{{ .Values.otsFrontendImage }}"
+        imagePullPolicy: "{{ .Values.otsFrontendImagePullPolicy }}"
         ports:
         - containerPort: 3000
         resources:
-          requests:
-            memory: "256Mi"
-            cpu: "512m"
-          limits:
-            memory: "512Mi"
-            cpu: "1024m"
+          {{- .Values.otsFrontendResources | toYaml | nindent 10 }}
         readinessProbe:
           httpGet:
             path: /
@@ -42,6 +43,6 @@ spec:
           periodSeconds: 5
         env:
         - name: REACT_APP_ENV
-          value: "prod"
+          value: {{ .Values.otsFrontendEnv.REACT_APP_ENV | default "prod" | quote}}
         - name: REACT_APP_OTS_BACKEND_URL
-          value: "http://api.ots.com"
+          value: {{ .Values.otsFrontendEnv.REACT_APP_OTS_BACKEND_URL | quote }}

@@ -1,15 +1,19 @@
 kind: HorizontalPodAutoscaler 
 apiVersion: autoscaling/v2beta2
 metadata:
-  name: ots-backend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-backend"
+  namespace: "{{ .Values.otsNamespace }}"
+  labels:
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
-  maxReplicas: 50
-  minReplicas: 1 
+  maxReplicas: {{ .Values.otsBackendHpaMaxReplicas }}
+  minReplicas: {{ .Values.otsBackendHpaMinReplicas }}
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment 
-    name: ots-backend
+    name: "{{ .Values.otsNamespace }}-backend"
   behavior:
     scaleUp:
       policies:

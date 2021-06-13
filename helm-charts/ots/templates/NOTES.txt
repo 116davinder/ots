@@ -1,0 +1,10 @@
+# Thanks for Installing OTS
+
+## Following are the links to your applications
+
+UI: https://{{ .Values.otsFrontendIngressAddress }}
+API: https://{{ .Values.otsBackendIngressAddress }}/docs
+
+## Author Details
+Name: Davinder Pal
+Github: https://github.com/116davinder

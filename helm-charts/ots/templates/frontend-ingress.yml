@@ -1,17 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ots-frontend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-frontend"
+  namespace: "{{ .Values.otsNamespace }}"
+  labels:
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
   rules:
-    - host: ots.com
+    - host: "{{ .Values.otsFrontendIngressAddress }}"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: ots-frontend
+                name: "{{ .Values.otsNamespace }}-frontend"
                 port:
                   number: 3000

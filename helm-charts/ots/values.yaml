@@ -1,0 +1,69 @@
+# general
+otsNamespace: "ots"
+
+# labels will be appended only
+labels:
+  authorGithub: "116davinder"
+  authorMedium: "116davinder"
+
+############
+# backend deployment
+############
+
+otsBackendReplicas: 1
+otsBackendImage: "ots_backend:latest"
+otsBackendImagePullPolicy: "Never"
+otsBackendEnv:
+  OTS_SALT: "somethingIDonotWantToKnow"
+  OTS_DB_HOST: "192.168.29.243"
+  OTS_DB_PORT: 6379
+  OTS_DB_PASSWORD: ""
+  OTS_DB_SSL: "False" # string value only
+  OTS_DB_NAME: 0
+
+otsBackendResources:
+  requests:
+    memory: "256Mi"
+    cpu: "512m"
+  limits:
+    memory: "512Mi"
+    cpu: "1024m"
+
+# backend service
+otsBackendServiceType: "ClusterIP"
+
+# backend ingress
+otsBackendIngressAddress: "api.ots.com"
+
+# backend hpa
+otsBackendHpaMaxReplicas: 10
+otsBackendHpaMinReplicas: 1
+
+################
+# frontend deployment
+################
+otsFrontendReplicas: 1
+otsFrontendImage: "ots_frontend:latest"
+otsFrontendImagePullPolicy: "Never"
+otsFrontendEnv:
+  REACT_APP_ENV: "prod"
+  REACT_APP_OTS_BACKEND_URL: "https://api.ots.com"
+
+otsFrontendResources:
+  requests:
+    memory: "256Mi"
+    cpu: "512m"
+  limits:
+    memory: "512Mi"
+    cpu: "1024m"
+
+# frontend service
+otsFrontendServiceType: "ClusterIP"
+
+# frontend ingress
+otsFrontendIngressAddress: "ots.com"
+
+# frontend hpa
+otsFrontendHpaMaxReplicas: 10
+otsFrontendHpaMinReplicas: 1
+

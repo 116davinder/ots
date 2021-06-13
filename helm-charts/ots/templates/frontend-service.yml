@@ -1,12 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ots-frontend
-  namespace: ots
+  name: "{{ .Values.otsNamespace }}-frontend"
+  namespace: "{{ .Values.otsNamespace }}"
+  labels:
+    {{- range $k, $v := .Values.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
 spec:
   selector:
-    app: ots-frontend
-  type: ClusterIP
+    app: "{{ .Values.otsNamespace }}-frontend"
+  type: "{{ .Values.otsFrontendServiceType }}"
   ports:
     - name: http
       protocol: TCP
