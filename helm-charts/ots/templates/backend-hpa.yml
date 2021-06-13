@@ -1,19 +1,20 @@
+{{- if .Values.otsBackend.autoscaling.enabled }}
 kind: HorizontalPodAutoscaler 
 apiVersion: autoscaling/v2beta2
 metadata:
-  name: "{{ .Values.otsNamespace }}-backend"
-  namespace: "{{ .Values.otsNamespace }}"
+  name: {{ .Chart.Name }}-backend
+  namespace: {{ .Chart.Name }}
   labels:
     {{- range $k, $v := .Values.labels }}
     {{ $k }}: {{ $v | quote }}
     {{- end }}
 spec:
-  maxReplicas: {{ .Values.otsBackendHpaMaxReplicas }}
-  minReplicas: {{ .Values.otsBackendHpaMinReplicas }}
+  maxReplicas: {{ .Values.otsBackend.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.otsBackend.autoscaling.minReplicas }}
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment 
-    name: "{{ .Values.otsNamespace }}-backend"
+    name: {{ .Chart.Name }}-backend
   behavior:
     scaleUp:
       policies:
@@ -35,10 +36,11 @@ spec:
       name: cpu
       target:
         type: Utilization 
-        averageUtilization: 80
+        averageUtilization: {{ .Values.otsBackend.autoscaling.averageUtilization }}
   - type: Resource
     resource:
       name: memory
       target:
         type: Utilization 
-        averageUtilization: 80
+        averageUtilization: {{ .Values.otsBackend.autoscaling.averageUtilization }}
+{{- end }}

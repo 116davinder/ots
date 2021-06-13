@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: "{{ .Values.otsNamespace }}"
+  name: {{ .Chart.Name }}
   labels:
     {{- range $k, $v := .Values.labels }}
     {{ $k }}: {{ $v | quote }}

@@ -2,8 +2,8 @@
 
 ## Following are the links to your applications
 
-UI: https://{{ .Values.otsFrontendIngressAddress }}
-API: https://{{ .Values.otsBackendIngressAddress }}/docs
+UI: https://{{ .Values.otsFrontend.ingress.host }}
+API: https://{{ .Values.otsBackend.ingress.host }}/docs
 
 ## Author Details
 Name: Davinder Pal

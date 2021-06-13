@@ -1,5 +1,5 @@
 cryptography>=3.4.7
 redis>=3.5.3
-fastapi>=0.65.1
-uvicorn>=0.13.4
-certifi>=2019.11.28
+fastapi>=0.65.2
+uvicorn>=0.14
+certifi>=2021.5.30

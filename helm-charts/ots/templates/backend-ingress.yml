@@ -1,21 +1,27 @@
+{{- if .Values.otsBackend.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: "{{ .Values.otsNamespace }}-backend"
-  namespace: "{{ .Values.otsNamespace }}"
+  name: {{ .Chart.Name }}-backend
+  namespace: {{ .Chart.Name }}
   labels:
     {{- range $k, $v := .Values.labels }}
     {{ $k }}: {{ $v | quote }}
     {{- end }}
+  {{- with .Values.otsBackend.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   rules:
-    - host: "{{ .Values.otsBackendIngressAddress }}"
+    - host: {{ .Values.otsBackend.ingress.host }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: "{{ .Values.otsNamespace }}-backend"
+                name: {{ .Chart.Name }}-backend
                 port:
-                  number: 5000
+                  number: {{ .Values.otsBackend.service.port }}
+{{- end }}

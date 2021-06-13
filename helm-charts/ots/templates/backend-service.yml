@@ -1,18 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ .Values.otsNamespace }}-backend"
-  namespace: "{{ .Values.otsNamespace }}"
+  name: {{ .Chart.Name }}-backend
+  namespace: {{ .Chart.Name }}
   labels:
     {{- range $k, $v := .Values.labels }}
     {{ $k }}: {{ $v | quote }}
     {{- end }}
 spec:
   selector:
-    app: "{{ .Values.otsNamespace }}-backend"
-  type: "{{ .Values.otsBackendServiceType }}"
+    app: {{ .Chart.Name }}-backend
+  type: {{ .Values.otsBackend.service.type }}
   ports:
     - name: http
       protocol: TCP
-      port: 5000
+      port: {{ .Values.otsBackend.service.port }}
       targetPort: 5000
