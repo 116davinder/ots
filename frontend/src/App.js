@@ -5,15 +5,11 @@ export default function App() {
     <>
       <div className="py-20 px-10 bg-green-800 text-green-100">
         {/* create a secret message */}
-        {/* input: secret message */}
-        {/* input: passphrase */}
         <h2 className="text-3xl font-bold mb-2 text-white">Create a Secret</h2>
         <CreateSecretForm />
       </div>
       <div className="py-20 px-10 bg-blue-800 text-blue-100">
-        {/* input: hash */}
-        {/* input: passphrase */}
-        {/* show: secret message */}
+        {/* show a secret message */}
         <h2 className="text-3xl font-bold mb-2 text-white">Show a Secret</h2>
         <ShowSecretForm />
       </div>
@@ -24,6 +20,7 @@ export default function App() {
 function CreateSecretForm() {
   const [message, setMessage] = useState("");
   const [passphrase, setPassphrase] = useState("");
+  const [expiration_time, setexpiration_time] = useState(259200); // 3 days default expiration time
   const [secretId, setSecretId] = useState(null);
 
   async function handleSubmit(e) {
@@ -33,7 +30,7 @@ function CreateSecretForm() {
       process.env.REACT_APP_OTS_BACKEND_URL + "/create_secret",
       {
         method: "POST",
-        body: JSON.stringify({ message, passphrase, "expiration_time": 259200 }), // 3 days default expiration time
+        body: JSON.stringify({ message, passphrase, expiration_time }),
         headers: new Headers({
           'Content-Type': 'application/json',
         }),
@@ -52,9 +49,10 @@ function CreateSecretForm() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <label className="font-bold text-xs mb-1">What's Your Secret?</label>
+        <label className="font-bold text-xs mb-1">What is Your Secret?</label>
         <textarea
           className="w-full p-2 rounded mb-2 text-gray-800"
+          minLength="3"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         >
@@ -65,8 +63,19 @@ function CreateSecretForm() {
         <input
           className="w-full p-2 rounded mb-4 text-gray-800"
           type="text"
+          maxLength="25"
           value={passphrase}
           onChange={(e) => setPassphrase(e.target.value)}
+        />
+
+        <label className="font-bold text-xs mb-1">Expiration (Seconds)</label>
+        <input
+          className="w-full p-2 rounded mb-4 text-gray-800"
+          type="number"
+          min="60"
+          max="604800"
+          value={expiration_time}
+          onChange={(e) => setexpiration_time(e.target.value)}
         />
 
         <button className="py-2 px-4 rounded bg-yellow-400 text-yellow-900 text-sm">
@@ -76,13 +85,30 @@ function CreateSecretForm() {
 
       {/* success message */}
       {secretId && (
-        <div className="bg-white text-gray-800 p-4 rounded shadow mt-10">
+        <div className="bg-white text-gray-800 p-3 rounded shadow mt-6">
           <p>
             Your secret message ID is{" "}
-            <strong className="text-blue-400 font-bold">{secretId}</strong>.
+            <strong className="text-blue-400 font-bold">{secretId}</strong>
           </p>
         </div>
       )}
+
+      {/* curl output hack*/}
+      {secretId && (
+        <div className="bg-white text-gray-800 p-6 rounded shadow mt-6">
+          <pre>
+          curl -X 'POST' {process.env.REACT_APP_OTS_BACKEND_URL + "/get_secret "}
+          -H 'Content-Type: application/json' \<br></br>
+          -d '{
+            "{" + "\"" + "passphrase" + "\"" +
+            ": " + "\"" + passphrase + "\"" +
+            " ," + "\"" + "id" + "\"" +
+            ": " + "\"" + secretId + "\"" + "}"
+          }'
+          </pre>
+        </div>
+      )}
+
     </>
   );
 }

@@ -24,7 +24,7 @@ otsBackend:
     enabled: true
     minReplicas: 1
     maxReplicas: 10
-    averageUtilization: 80
+    averageUtilization: 60
 
   nodeSelector: {}
 
@@ -86,7 +86,7 @@ otsFrontend:
     enabled: true
     minReplicas: 1
     maxReplicas: 10
-    averageUtilization: 80
+    averageUtilization: 60
 
   nodeSelector: {}
 
