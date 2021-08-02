@@ -1,0 +1,6 @@
+uses: smartsquaregmbh/delete-old-packages@v0.3.1
+with:
+  keep: 1
+  names: |
+    ots_backend
+    ots_frontend
