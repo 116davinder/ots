@@ -23,6 +23,8 @@ docker-compose up
 
 [Backend Swagger UI](http://localhost:5000/docs)
 
+## Security Review
+[security.md](./docs/security.md)
 
 ## Production Stack
 ### Public Docker Images
