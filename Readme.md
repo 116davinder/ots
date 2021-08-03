@@ -23,7 +23,21 @@ docker-compose up
 
 [Backend Swagger UI](http://localhost:5000/docs)
 
+
 ## Production Stack
+### Public Docker Images
+Images are published as part of github ci.
+
+Ref: https://github.com/116davinder?tab=packages&repo_name=ots
+
+#### Frontend Docker Images
+* `ghcr.io/116davinder/ots_frontend:main` from main branch.
+* `ghcr.io/116davinder/ots_frontend:pr-<pr-number>` from your PR.
+
+#### Bakend Docker Images
+* `ghcr.io/116davinder/ots_backend:main` from main branch.
+* `ghcr.io/116davinder/ots_backend:pr-<pr-number>` from your PR.
+
 We will be using `helm` to deploy the stack.
 ```bash
 
