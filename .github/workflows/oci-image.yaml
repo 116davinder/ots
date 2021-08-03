@@ -50,14 +50,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ steps.meta.outputs.tags }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-frontend-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-frontend-results.sarif'
+          format: 'table'
+          exit-code: '1'
 
 
   frontend:
@@ -95,11 +89,5 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ steps.meta.outputs.tags }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-backend-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-backend-results.sarif'
+          format: 'table'
+          exit-code: '0' # update to 1, once migrated to react 18
