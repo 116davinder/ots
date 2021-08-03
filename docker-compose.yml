@@ -38,4 +38,4 @@ services:
       - "3000:3000"
     environment:
       REACT_APP_ENV: "prod"    # options: dev/prod
-      REACT_APP_OTS_BACKEND_URL: "http://192.168.29.243:5000"
+      REACT_APP_OTS_BACKEND_URL: "http://10.134.10.84:5000"
