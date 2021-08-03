@@ -5,7 +5,7 @@ RUN pip3 install --upgrade pip
 RUN mkdir -p /app
 
 RUN apk add gcc libffi-dev rust cargo openssl-dev
-# musl-dev
+
 COPY requirements.txt /app
 
 RUN pip3 install -r /app/requirements.txt
