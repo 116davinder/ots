@@ -11,7 +11,6 @@ COPY package.json /app
 ENV CI=true
 
 RUN npm install && \
-    npm audit fix && \
     npm install -g env-cmd serve
 
 COPY . ./
