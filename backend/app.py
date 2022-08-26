@@ -14,6 +14,7 @@ from typing import Optional
 import uvicorn
 import certifi
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 __author__ = "Davinder Pal"
 __author_email__ = "dpsangwal@gmail.com"
@@ -181,6 +182,7 @@ def health():
 
 if __name__ == "__main__":
     log_config = uvicorn.config.LOGGING_CONFIG
+    log_config["log_level"] = getenv("OTS_LOG_LEVEL", logging.INFO),
     log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
     log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
     uvicorn.run(app, host="0.0.0.0", port=5000, log_config=log_config)

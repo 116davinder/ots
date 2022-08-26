@@ -1,4 +1,4 @@
-from python:3.8.10-alpine3.13
+from python:3.10-alpine
 
 RUN pip3 install --upgrade pip --no-cache-dir && \
     mkdir -p /app && \
