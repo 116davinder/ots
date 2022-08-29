@@ -23,23 +23,23 @@ tags_metadata = [
     {
         "name": "Create Secret",
         "description": "It will return a secret id based on given parameters" +
-            "like message/passphrase/expiration_time after saving them in redis database.",
+                "like message/passphrase/expiration_time after saving them in redis database.",
     },
     {
         "name": "get_secret",
         "description": "It will return secret message if given parameters like" +
-            "passphrase/id matches with stored value in redis database",
+                "passphrase/id matches with stored value in redis database",
     },
     {
-    "name": "health",
-    "description": "It will return ok on get request."
+        "name": "health",
+        "description": "It will return ok on get request."
     },
 ]
 
 app = FastAPI(
     title="One Time Secret Sharing Application",
-    description="This project will create ontime secret id for secret sharing across different organisation.",
-    version="0.1.0",
+    description="This project will create onetime secret id for secret sharing across different organisation.",
+    version="0.2.0",
     openapi_tags=tags_metadata
 )
 
@@ -67,14 +67,17 @@ r = redis.Redis(
     db=getenv("OTS_DB_NAME", 0)
 )
 
+
 class Secrets(BaseModel):
     passphrase: Optional[str]
     message: str = None
     expiration_time: Optional[int] = 604800
 
+
 class Id(BaseModel):
     passphrase: Optional[str]
     id: str
+
 
 @app.post("/create_secret", status_code=status.HTTP_201_CREATED, response_class=JSONResponse, tags=["Create Secret"])
 def create_secret(secret: Secrets):
@@ -95,12 +98,12 @@ def create_secret(secret: Secrets):
         )
 
     id = uuid4().hex
-    m = hashlib.sha3_512()
+    m = hashlib.sha512()
     m.update(_pass.encode("utf-8"))
     user_sha = m.hexdigest()
-    # setup a Fernet key based on our passphrase
+    # set up a Fernet key based on our passphrase
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA3_512(),
+        algorithm=hashes.SHA512_256(),
         length=32,
         salt=salt,
         iterations=10000,
@@ -112,13 +115,14 @@ def create_secret(secret: Secrets):
     # encrypt the message
     ciphertext = f.encrypt(_message.encode("utf-8"))
 
-    #update redis database
+    # update redis database
     r.setex(
         id,
         timedelta(seconds=_expiration_time),
         "{0}\n{1}".format(user_sha, ciphertext.decode("utf-8")),
     )
     return {"id": id}
+
 
 @app.post("/get_secret", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["get_secret"])
 def get_secret(id: Id):
@@ -151,7 +155,7 @@ def get_secret(id: Id):
     data = data.decode("utf-8")
     stored_sha, stored_ciphertext = data.split("\n")
 
-    m = hashlib.sha3_512()
+    m = hashlib.sha512()
     m.update(_pass.encode("utf-8"))
     user_sha = m.hexdigest()
 
@@ -165,7 +169,7 @@ def get_secret(id: Id):
     # If this doesn't return a value we say secret has either
     # never existed or it was already read
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA3_512(),
+        algorithm=hashes.SHA512_256(),
         length=32,
         salt=salt,
         iterations=10000,
@@ -176,9 +180,11 @@ def get_secret(id: Id):
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
     return {"message": decrypted_message.decode("utf-8")}
 
+
 @app.get("/health", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["health"])
 def health():
     return {"health": "ok"}
+
 
 if __name__ == "__main__":
     log_config = uvicorn.config.LOGGING_CONFIG

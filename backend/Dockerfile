@@ -3,7 +3,7 @@ from python:3.10-alpine
 RUN pip3 install --upgrade pip --no-cache-dir && \
     mkdir -p /app && \
     apk -U upgrade && \
-    apk add gcc libffi-dev rust cargo openssl-dev --no-cache
+    apk add gcc libffi-dev openssl-dev --no-cache
 
 COPY requirements.txt /app
 
