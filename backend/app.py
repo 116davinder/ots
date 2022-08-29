@@ -98,9 +98,8 @@ def create_secret(secret: Secrets):
         )
 
     id = uuid4().hex
-    m = hashlib.sha512()
-    m.update(_pass.encode("utf-8"))
-    user_sha = m.hexdigest()
+    user_sha = hashlib.sha512(_pass.encode("utf-8")).hexdigest()
+
     # set up a Fernet key based on our passphrase
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA512_256(),
@@ -109,7 +108,7 @@ def create_secret(secret: Secrets):
         iterations=10000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode("utf-8")))  # Can only use kdf once
     f = Fernet(key)
 
     # encrypt the message
@@ -155,9 +154,7 @@ def get_secret(id: Id):
     data = data.decode("utf-8")
     stored_sha, stored_ciphertext = data.split("\n")
 
-    m = hashlib.sha512()
-    m.update(_pass.encode("utf-8"))
-    user_sha = m.hexdigest()
+    user_sha = hashlib.sha512(_pass.encode("utf-8")).hexdigest()
 
     if stored_sha != user_sha:
         raise HTTPException(
@@ -175,7 +172,7 @@ def get_secret(id: Id):
         iterations=10000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode("utf-8")))  # Can only use kdf once
     f = Fernet(key)
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
     return {"message": decrypted_message.decode("utf-8")}
