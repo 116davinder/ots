@@ -3,3 +3,4 @@ redis>=3.5.3
 fastapi>=0.65.2
 uvicorn>=0.14
 certifi>=2021.5.30
+pydantic>=1.9.2

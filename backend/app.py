@@ -14,6 +14,7 @@ from typing import Optional
 import uvicorn
 import certifi
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
 __author__ = "Davinder Pal"
 __author_email__ = "dpsangwal@gmail.com"
@@ -22,23 +23,23 @@ tags_metadata = [
     {
         "name": "Create Secret",
         "description": "It will return a secret id based on given parameters" +
-            "like message/passphrase/expiration_time after saving them in redis database.",
+                "like message/passphrase/expiration_time after saving them in redis database.",
     },
     {
         "name": "get_secret",
         "description": "It will return secret message if given parameters like" +
-            "passphrase/id matches with stored value in redis database",
+                "passphrase/id matches with stored value in redis database",
     },
     {
-    "name": "health",
-    "description": "It will return ok on get request."
+        "name": "health",
+        "description": "It will return ok on get request."
     },
 ]
 
 app = FastAPI(
     title="One Time Secret Sharing Application",
-    description="This project will create ontime secret id for secret sharing across different organisation.",
-    version="0.1.0",
+    description="This project will create onetime secret id for secret sharing across different organisation.",
+    version="0.2.0",
     openapi_tags=tags_metadata
 )
 
@@ -66,14 +67,17 @@ r = redis.Redis(
     db=getenv("OTS_DB_NAME", 0)
 )
 
+
 class Secrets(BaseModel):
     passphrase: Optional[str]
     message: str = None
     expiration_time: Optional[int] = 604800
 
+
 class Id(BaseModel):
     passphrase: Optional[str]
     id: str
+
 
 @app.post("/create_secret", status_code=status.HTTP_201_CREATED, response_class=JSONResponse, tags=["Create Secret"])
 def create_secret(secret: Secrets):
@@ -94,30 +98,30 @@ def create_secret(secret: Secrets):
         )
 
     id = uuid4().hex
-    m = hashlib.sha3_512()
-    m.update(_pass.encode("utf-8"))
-    user_sha = m.hexdigest()
-    # setup a Fernet key based on our passphrase
+    user_sha = hashlib.sha512(_pass.encode("utf-8")).hexdigest()
+
+    # set up a Fernet key based on our passphrase
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA3_512(),
+        algorithm=hashes.SHA512_256(),
         length=32,
         salt=salt,
         iterations=10000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode("utf-8")))  # Can only use kdf once
     f = Fernet(key)
 
     # encrypt the message
     ciphertext = f.encrypt(_message.encode("utf-8"))
 
-    #update redis database
+    # update redis database
     r.setex(
         id,
         timedelta(seconds=_expiration_time),
         "{0}\n{1}".format(user_sha, ciphertext.decode("utf-8")),
     )
     return {"id": id}
+
 
 @app.post("/get_secret", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["get_secret"])
 def get_secret(id: Id):
@@ -150,9 +154,7 @@ def get_secret(id: Id):
     data = data.decode("utf-8")
     stored_sha, stored_ciphertext = data.split("\n")
 
-    m = hashlib.sha3_512()
-    m.update(_pass.encode("utf-8"))
-    user_sha = m.hexdigest()
+    user_sha = hashlib.sha512(_pass.encode("utf-8")).hexdigest()
 
     if stored_sha != user_sha:
         raise HTTPException(
@@ -164,23 +166,26 @@ def get_secret(id: Id):
     # If this doesn't return a value we say secret has either
     # never existed or it was already read
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA3_512(),
+        algorithm=hashes.SHA512_256(),
         length=32,
         salt=salt,
         iterations=10000,
         backend=default_backend(),
     )
-    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode()))  # Can only use kdf once
+    key = base64.urlsafe_b64encode(kdf.derive(_pass.encode("utf-8")))  # Can only use kdf once
     f = Fernet(key)
     decrypted_message = f.decrypt(stored_ciphertext.encode("utf-8"))
     return {"message": decrypted_message.decode("utf-8")}
+
 
 @app.get("/health", status_code=status.HTTP_200_OK, response_class=JSONResponse, tags=["health"])
 def health():
     return {"health": "ok"}
 
+
 if __name__ == "__main__":
     log_config = uvicorn.config.LOGGING_CONFIG
+    log_config["log_level"] = getenv("OTS_LOG_LEVEL", logging.INFO),
     log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
     log_config["formatters"]["default"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
     uvicorn.run(app, host="0.0.0.0", port=5000, log_config=log_config)

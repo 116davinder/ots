@@ -92,23 +92,6 @@ function CreateSecretForm() {
           </p>
         </div>
       )}
-
-      {/* curl output hack*/}
-      {secretId && (
-        <div className="bg-white text-gray-800 p-6 rounded shadow mt-6">
-          <pre>
-          curl -X 'POST' {process.env.REACT_APP_OTS_BACKEND_URL + "/get_secret "}
-          -H 'Content-Type: application/json' \<br></br>
-          -d '{
-            "{" + "\"" + "passphrase" + "\"" +
-            ": " + "\"" + passphrase + "\"" +
-            " ," + "\"" + "id" + "\"" +
-            ": " + "\"" + secretId + "\"" + "}"
-          }'
-          </pre>
-        </div>
-      )}
-
     </>
   );
 }
